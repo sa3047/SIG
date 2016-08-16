@@ -25,7 +25,8 @@ namespace SQLPractice
         {
             SqlDataAdapter da;
             SqlCommand cmd;
-            SqlConnection conn;
+            SqlConnection conn = null;
+
             if (string.IsNullOrEmpty(this.ConnectionStr))
             {
                 throw new ArgumentNullException("Connection string can not be empty");
@@ -43,6 +44,7 @@ namespace SQLPractice
 
                 da = new SqlDataAdapter(cmd);
                 ////Executes the query
+                conn.Open();
                 da.Fill(ds);
 
                 return ds.Tables[0];
@@ -50,6 +52,55 @@ namespace SQLPractice
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets data using DataReader
+        /// </summary>
+        /// <returns> Returns datatable</returns>
+        public DataTable GetProductsUsingSqlDataReader()
+        {
+            SqlCommand cmd;
+            SqlConnection conn = null;
+
+            if (string.IsNullOrEmpty(this.ConnectionStr))
+            {
+                throw new ArgumentNullException("Connection string can not be empty");
+            }
+
+            try
+            {
+                DataTable dt = new DataTable();
+                //// Create the connection obj
+                conn = new SqlConnection(this.ConnectionStr);
+
+                //// create a command object
+                cmd = new SqlCommand("Select * from Products", conn);
+                cmd.CommandType = CommandType.Text;
+                conn.Open();
+                var reader = cmd.ExecuteReader();
+                dt.Load(reader);
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                if (conn != null)
+                {
+                    conn.Close();
+                }
             }
         }
     }
